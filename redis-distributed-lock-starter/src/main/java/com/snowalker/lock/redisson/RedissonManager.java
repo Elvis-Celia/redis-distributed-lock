@@ -40,6 +40,7 @@ public class RedissonManager {
 
     /**
      * Redisson连接方式配置工厂
+     * 双重检查锁
      */
     static class RedissonConfigFactory {
 
@@ -49,8 +50,10 @@ public class RedissonManager {
 
         public static RedissonConfigFactory getInstance() {
             if (factory == null) {
-                synchronized (RedissonConfigFactory.class) {
-                    factory = new RedissonConfigFactory();
+                synchronized (Object.class) {
+                    if (factory == null) {
+                        factory = new RedissonConfigFactory();
+                    }
                 }
             }
             return factory;
@@ -68,7 +71,6 @@ public class RedissonManager {
             Preconditions.checkNotNull(redissonProperties.getAddress(), "redisson.lock.server.address cannot be NULL!");
             Preconditions.checkNotNull(redissonProperties.getType(), "redisson.lock.server.password cannot be NULL");
             Preconditions.checkNotNull(redissonProperties.getDatabase(), "redisson.lock.server.database cannot be NULL");
-            Preconditions.checkNotNull(redissonProperties.getPassword(), "redisson.lock.server.type cannot be NULL");
             String connectionType = redissonProperties.getType();
             /**声明配置上下文*/
             RedissonConfigContext redissonConfigContext = null;
